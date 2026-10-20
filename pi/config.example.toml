@@ -1,0 +1,44 @@
+# Copier en config.toml (ignoré par git) et adapter.
+
+[camera]
+# Adresse fixe de la caméra sur le réseau du Pi (réservation DHCP conseillée)
+base_url = "http://10.42.0.20"
+stream_url = "http://10.42.0.20:81/stream"
+# Même valeur que CAMERA_TOKEN dans firmware/include/secrets.h
+token = "remplacez-par-un-jeton-aleatoire"
+max_clock_skew_ms = 1500
+
+[detector]
+# Position de la bande surveillée (fraction de la hauteur de l'image, 0 = haut).
+# La placer SUR la ligne peinte : le contraste blanc/coureur est le meilleur.
+line_y = 0.5
+band_px = 14            # hauteur de la bande (pixels sur une image de 320 px de large)
+process_width = 320
+threshold = 25          # écart de gris pour « occupé » : monter si faux positifs (ombres)
+col_fill = 0.25
+min_blob_px = 10
+gap_px = 3
+# Largeur d'un coureur vu du dessus en pixels de travail. Calibrage :
+# un bénévole passe seul sur la ligne, onglet « Réglage », lire la largeur du cadre vert.
+# 5 m couverts par 320 px => 64 px/m => 45 cm d'épaules ≈ 28 px
+runner_width_px = 28.0
+lighting_ratio = 0.9
+persist_frames = 3
+bg_alpha = 0.05
+warmup_frames = 10
+
+[recording]
+data_dir = "./data"
+buffer_s = 10.0
+photo_pre_s = 0.5
+photo_post_s = 1.0
+record_all = false      # true : toutes les images de la course (~1,5 Go/h), rejouables
+
+[server]
+host = "0.0.0.0"
+port = 8000
+# Code saisi par les bénévoles sur la tablette (8 caractères ou plus conseillés)
+volunteer_token = "changez-ce-code"
+timezone = "Europe/Paris"
+# CSV « dossard;nom;prenom;categorie;club » (optionnel)
+participants_csv = ""

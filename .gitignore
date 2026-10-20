@@ -1,0 +1,13 @@
+# Secrets
+firmware/include/secrets.h
+pi/config.toml
+
+# Données de course (images de participants, base)
+pi/data/
+
+# Build / environnement
+firmware/.pio/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/

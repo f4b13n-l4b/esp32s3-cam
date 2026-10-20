@@ -1,0 +1,20 @@
+[Unit]
+Description=Chrono de ligne d'arrivée
+After=network-online.target chrony.service
+Wants=network-online.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/esp32s3-cam/pi
+ExecStart=/home/pi/esp32s3-cam/pi/.venv/bin/python -m finishline --config config.toml
+Restart=always
+RestartSec=2
+# Durcissement : le service n'écrit que dans son dossier de données
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/pi/esp32s3-cam/pi/data
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

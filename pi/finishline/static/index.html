@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Chrono arrivée</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="app.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <!-- Connexion -->
+  <main id="login" class="login" hidden>
+    <h1>Chrono arrivée</h1>
+    <form id="login-form">
+      <label for="token">Code d'accès bénévole</label>
+      <input id="token" type="password" autocomplete="current-password" required minlength="6">
+      <button type="submit" class="primary">Entrer</button>
+      <p id="login-error" class="error" role="alert"></p>
+    </form>
+  </main>
+
+  <div id="app" hidden>
+    <header class="topbar">
+      <div class="race-name" id="race-name">—</div>
+      <div class="status" id="cam-status" role="status" aria-live="polite">Caméra…</div>
+      <div class="clock" id="clock" aria-label="Heure du serveur">--:--:--</div>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-tab="saisie" aria-selected="true">Saisie</button>
+      <button role="tab" data-tab="controle" aria-selected="false">Contrôle</button>
+      <button role="tab" data-tab="course" aria-selected="false">Course</button>
+      <button role="tab" data-tab="reglage" aria-selected="false">Réglage</button>
+    </nav>
+
+    <p id="toast" class="toast" role="alert" hidden></p>
+
+    <!-- Saisie des dossards -->
+    <section id="tab-saisie" role="tabpanel" class="panel saisie">
+      <div class="counters">
+        <div><span id="n-passages">0</span><small>passages caméra</small></div>
+        <div><span id="n-bibs">0</span><small>dossards saisis</small></div>
+        <div id="delta-box"><span id="n-delta">0</span><small id="delta-label">écart</small></div>
+      </div>
+      <form id="bib-form" class="bib-form" autocomplete="off">
+        <label for="bib" class="sr-only">Numéro de dossard</label>
+        <input id="bib" inputmode="numeric" pattern="[0-9A-Za-z\-]{1,8}" maxlength="8" placeholder="Dossard" required>
+        <div class="keypad" aria-label="Pavé numérique">
+          <button type="button" data-key="1">1</button><button type="button" data-key="2">2</button><button type="button" data-key="3">3</button>
+          <button type="button" data-key="4">4</button><button type="button" data-key="5">5</button><button type="button" data-key="6">6</button>
+          <button type="button" data-key="7">7</button><button type="button" data-key="8">8</button><button type="button" data-key="9">9</button>
+          <button type="button" data-key="back" aria-label="Effacer">⌫</button><button type="button" data-key="0">0</button>
+          <button type="submit" class="primary" aria-label="Valider le dossard">OK</button>
+        </div>
+      </form>
+      <button id="manual-passage" type="button" class="secondary wide">+ Passage manuel (caméra a raté un coureur)</button>
+      <h2>Derniers dossards</h2>
+      <ol id="last-bibs" class="last-bibs" reversed></ol>
+    </section>
+
+    <!-- Contrôle / classement -->
+    <section id="tab-controle" role="tabpanel" class="panel" hidden>
+      <ul id="warnings" class="warnings"></ul>
+      <div class="table-wrap">
+        <table class="ranking">
+          <thead><tr><th>Pl.</th><th>Dossard</th><th>Nom</th><th>Temps</th><th>Actions</th></tr></thead>
+          <tbody id="ranking"></tbody>
+        </table>
+      </div>
+      <h2>Passages</h2>
+      <div class="table-wrap">
+        <table class="passages">
+          <thead><tr><th>Heure</th><th>Temps</th><th>Nb</th><th>Source</th><th>Actions</th></tr></thead>
+          <tbody id="passages"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Gestion de la course -->
+    <section id="tab-course" role="tabpanel" class="panel" hidden>
+      <form id="race-form" class="card">
+        <h2>Nouvelle course</h2>
+        <label for="race-input">Nom</label>
+        <input id="race-input" required maxlength="80" placeholder="Automnales 10 km">
+        <button type="submit" class="secondary">Créer</button>
+      </form>
+      <form id="start-form" class="card">
+        <h2>Départ</h2>
+        <p>Départ actuel : <strong id="start-current">non donné</strong></p>
+        <button type="button" id="start-now" class="primary wide">Donner le départ maintenant</button>
+        <label for="start-time">ou corriger l'heure (HH:MM:SS.d)</label>
+        <input id="start-time" placeholder="10:00:00.0" pattern="\d{1,2}:\d{2}:\d{2}([.,]\d{1,3})?">
+        <button type="submit" class="secondary">Enregistrer l'heure</button>
+      </form>
+      <div class="card">
+        <h2>Fin et export</h2>
+        <button type="button" id="close-race" class="secondary">Clôturer la course</button>
+        <button type="button" id="export" class="primary">Télécharger le classement (CSV)</button>
+      </div>
+    </section>
+
+    <!-- Réglage caméra -->
+    <section id="tab-reglage" role="tabpanel" class="panel" hidden>
+      <p>Bande orange : ligne surveillée. Cadres verts : coureurs détectés (nombre estimé).</p>
+      <img id="preview" alt="Aperçu de la caméra avec la ligne de détection">
+      <dl id="cam-details" class="details"></dl>
+    </section>
+  </div>
+
+  <dialog id="photo-dialog" aria-labelledby="photo-title">
+    <h2 id="photo-title">Photos du passage</h2>
+    <img id="photo-main" alt="Image du passage">
+    <div class="photo-nav">
+      <button type="button" id="photo-prev" class="secondary">◀ Précédente</button>
+      <span id="photo-info"></span>
+      <button type="button" id="photo-next" class="secondary">Suivante ▶</button>
+    </div>
+    <form method="dialog"><button class="primary">Fermer</button></form>
+  </dialog>
+</body>
+</html>

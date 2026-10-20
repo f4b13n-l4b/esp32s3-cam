@@ -1,0 +1,9 @@
+[project]
+name = "finishline"
+version = "0.1.0"
+description = "Chronométrage de ligne d'arrivée : caméra ESP32-S3 + Raspberry Pi"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
